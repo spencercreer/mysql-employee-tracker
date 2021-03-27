@@ -1,6 +1,16 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
-const cTable = require('console.table')
+const mysql = require('mysql');
+const cTable = require('console.table');
+
+var connection = mysql.createConnection({
+    host     : 'localhost',
+    port: 3306,
+    user: 'root',
+    password : '955503Sc!',
+    database : 'employeeDB'
+});
+
 
 const initQuestions = [
     {
@@ -13,8 +23,20 @@ const initQuestions = [
 const employeeQuestions = [
     { 
         type:'input',
-        name:'employeeName',
-        message:"What is the employee's name?",
+        name:'firstName',
+        message:"What is the employee's first name?",
+        validate: answer =>{
+            if(answer!==''){
+                return true
+            } else{
+                return "Please enter the employee's name."
+            }
+        },
+    },
+    { 
+        type:'input',
+        name:'lastName',
+        message:"What is the employee's last name?",
         validate: answer =>{
             if(answer!==''){
                 return true
@@ -78,6 +100,11 @@ function addDepartment(){
 }
 
 function displayTable(){
+    connection.query('SELECT * FROM employee', (err, res) => {
+        if (err) throw err;
+        console.table(res);
+    });
+    
     // console.table(response)
 }
 
@@ -85,9 +112,9 @@ function init(){
     inquirer.prompt(initQuestions).then(response => {
         if(response.userChoice === 'View all employees'){
             console.log('View all employees');
+            displayTable();
         } else if(response.userChoice === 'View all employees by department'){
             console.log('View all employees by department');
-
         } else if(response.userChoice === 'View all employees by manager'){
             console.log('View all employees by manager');
         } else if(response.userChoice === 'Add a department'){
@@ -107,6 +134,11 @@ function init(){
     })
 }
 
-init();
+connection.connect((err) => {
+    if (err) throw err;
+    console.log(`connected as id ${connection.threadId}`);
+    init();
+  });
+
 
 
