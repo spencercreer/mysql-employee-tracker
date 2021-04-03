@@ -3,7 +3,7 @@ const initQuestions = [
         type: 'list',
         name: 'userChoice',
         message: ' What would you like to do?',
-        choices: ['View all employees', 'View all employees by department', 'View all employees by manager', 'Add a department', 'Add an employee role', 'Add an employee', 'Remove an employee', 'Update an employee', 'Quit program'],
+        choices: ['View all employees', 'View all roles', 'View all departments', 'View all employees by department', 'View all employees by manager', 'Add a department', 'Add an employee role', 'Add an employee', 'Remove an employee', 'Update an employee', 'Quit program'],
     },
 ]
 const employeeQuestions = [
@@ -72,7 +72,21 @@ const departmentQuestions = [
         },
     },
 ]
+const removeEmployeeQuestions = [
+    {
+        type: 'input',
+        name: 'department',
+        message: "What is the department?",
+        validate: answer => {
+            if (answer !== '') {
+                return true
+            } else {
+                return "Please enter the department."
+            }
+        },
+    },
+]
 
 module.exports = {
-    initQuestions, employeeQuestions, roleQuestions, departmentQuestions
+    initQuestions, employeeQuestions, roleQuestions, departmentQuestions, removeEmployeeQuestions
 }
