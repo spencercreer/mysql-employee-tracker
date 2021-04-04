@@ -31,6 +31,12 @@ const employeeQuestions = [
             }
         },
     },
+    {
+        type: 'list',
+        name: 'isManager',
+        message: 'Is the employee a manager?',
+        choices: ['Yes','No'],
+      },
 ]
 const roleQuestions = [
     {

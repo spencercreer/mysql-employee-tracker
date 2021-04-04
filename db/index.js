@@ -44,12 +44,16 @@ function addEmployee() {
                         first_name: response.firstName,
                         last_name: response.lastName,
                         role_id: data.filter(roleData => roleData.title === employeeRole)[0].id,
-                        manager_id: 1
+                        manager_id: 1,
+                        is_manager: response.isManager === 'Yes' ? true : false
                     },
                     (err) => {
                         if (err) throw err;
-                        console.log('\x1b[32m%s\x1b[0m', `${response.firstName.concat(" ", response.lastName)} was added as an employee successfully`);
-                        init();
+                        console.log('\x1b[32m%s\x1b[0m', `${response.firstName.concat(" ", response.lastName)} was successfully added as an employee`);
+                        findAllEmployees().then(data => {
+                            console.table(data);
+                            init();
+                        })
                     })
             )
         })
@@ -77,7 +81,10 @@ function addRole() {
                     (err) => {
                         if (err) throw err;
                         console.log('\x1b[32m%s\x1b[0m', `The ${response.roleTitle} role was added successfully`);
-                        init();
+                        findAllRoles().then(data => {
+                            console.table(data);
+                            init();
+                        })
                     })
             )
         })

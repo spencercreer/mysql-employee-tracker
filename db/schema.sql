@@ -9,6 +9,7 @@ CREATE TABLE employee (
     last_name VARCHAR(30) NOT NULL,
     role_id INT NOT NULL,
     manager_id INT,
+    is_manager BOOLEAN NOT NULL,
     PRIMARY KEY (id)
 );
 
