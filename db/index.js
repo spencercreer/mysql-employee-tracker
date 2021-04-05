@@ -18,8 +18,19 @@ connection.query = util.promisify(connection.query);
 
 // findAll functions query mysql for employees, roles, and departments
 function findAllEmployees() {
-    return connection.query('SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id')
+    return connection.query('SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.name AS department, roles.salary, CONCAT(manager.first_name, " ", manager.last_name) AS manager, employee.is_manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id')
 }
+function findAllManagers() {
+    // return connection.query('SELECT employee.id, is_manager FROM employee')
+    findAllEmployees().then(employeeData => {
+        return employeeData.filter(data => {
+            if (data.is_manager === true) {
+                return true
+            }
+        })
+    })
+}
+
 function findAllRoles() {
     return connection.query('SELECT roles.id, roles.title, roles.salary, department.name FROM roles LEFT JOIN department ON roles.department_id = department.id')
 }
@@ -209,7 +220,24 @@ function init() {
                 init();
             })
         } else if (response.userChoice === 'View all employees by department') {
-            console.log('This should display employees by department')
+            findAllDepartments().then(data => {
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'viewDepartment',
+                        message: 'Select a department',
+                        choices: data.map(departmentData => departmentData.name)
+                    }
+                ]).then(({ viewDepartment }) =>
+                    connection.query('SELECT department.name AS department, employee.first_name, employee.last_name, employee.id, roles.title, roles.salary, CONCAT(manager.first_name, " ", manager.last_name) AS manager, employee.is_manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id WHERE ?',
+                        {
+                            name: viewDepartment,
+                        }).then(data => {
+                            console.table(data);
+                            init();
+                        })
+                )
+            })
         } else if (response.userChoice === 'View all employees by manager') {
             console.log('This should display employees by manager')
         } else if (response.userChoice === 'Add a department') {
@@ -233,6 +261,7 @@ function init() {
 connection.connect((err) => {
     if (err) throw err;
     console.log(`connected as id ${connection.threadId}`);
+    // findAllManagers().then(response => console.log(response));
     init();
 });
 
