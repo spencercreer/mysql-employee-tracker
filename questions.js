@@ -3,7 +3,7 @@ const initQuestions = [
         type: 'list',
         name: 'userChoice',
         message: ' What would you like to do?',
-        choices: ['View all employees', 'View all roles', 'View all departments', 'View all employees by department', 'View all employees by manager', 'Add a department', 'Add an employee role', 'Add an employee', 'Remove an employee', 'Update an employee', 'Quit program'],
+        choices: ['View all employees', 'View all managers', 'View all roles', 'View all departments', 'View all employees by department', 'View all employees by manager', 'Add a department', 'Add an employee role', 'Add an employee', 'Remove an employee', 'Update an employee', 'Quit program'],
     },
 ]
 const employeeQuestions = [
@@ -38,6 +38,7 @@ const employeeQuestions = [
         choices: ['Yes','No'],
       },
 ]
+
 const roleQuestions = [
     {
         type: 'input',
