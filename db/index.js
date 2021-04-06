@@ -31,7 +31,7 @@ function findAllRoles() {
     return connection.query('SELECT roles.id, roles.title, roles.salary, department.name FROM roles LEFT JOIN department ON roles.department_id = department.id')
 }
 function findAllDepartments() {
-    return connection.query('SELECT department.id, department.name FROM department LEFT JOIN roles ON roles.department_id = department.id LEFT JOIN employee ON employee.role_id = roles.id GROUP BY department.id, department.name')
+    return connection.query('SELECT department.id, department.name, SUM(roles.salary) AS utilized_budget FROM department LEFT JOIN roles ON roles.department_id = department.id LEFT JOIN employee ON employee.role_id = roles.id GROUP BY department.id, department.name')
 }
 
 // addEmployee function prompts user employee questions and INSERTS into mysql db
