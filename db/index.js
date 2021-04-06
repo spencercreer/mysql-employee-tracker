@@ -53,35 +53,34 @@ function addEmployee() {
                         {
                             type: 'list',
                             name: 'employeeManager',
-                            message:"Who is the employee's manager?",
+                            message: "Who is the employee's manager?",
                             choices: managerArray
                         }
-                    ]).then(({ employeeManager }) => 
-                    connection.query('INSERT INTO employee SET ?',
-                    {
-                        first_name: response.firstName,
-                        last_name: response.lastName,
-                        role_id: data.filter(roleData => roleData.title === employeeRole)[0].id,
-                        manager_id: employeeManager === 'None' ? 0 : managerData.filter(managerData => {
-                            console.log(managerData);
-                            if (managerData.first_name === employeeManager.split(" ")[0] && managerData.last_name === employeeManager.split(" ")[1]) {
-                                return true
-                            }
-                        })[0].id,
-                        is_manager: response.isManager === 'Yes' ? true : false
-                    },
-                    (err) => {
-                        if (err) throw err;
-                        console.log('\x1b[32m%s\x1b[0m', `${response.firstName.concat(" ", response.lastName)} was successfully added as an employee`);
-                        findAllEmployees().then(data => {
-                            console.table(data);
-                            init();
-                        })
-                    })
+                    ]).then(({ employeeManager }) =>
+                        connection.query('INSERT INTO employee SET ?',
+                            {
+                                first_name: response.firstName,
+                                last_name: response.lastName,
+                                role_id: data.filter(roleData => roleData.title === employeeRole)[0].id,
+                                manager_id: employeeManager === 'None' ? 0 : managerData.filter(managerData => {
+                                    console.log(managerData);
+                                    if (managerData.first_name === employeeManager.split(" ")[0] && managerData.last_name === employeeManager.split(" ")[1]) {
+                                        return true
+                                    }
+                                })[0].id,
+                                is_manager: response.isManager === 'Yes' ? true : false
+                            },
+                            (err) => {
+                                if (err) throw err;
+                                console.log('\x1b[32m%s\x1b[0m', `${response.firstName.concat(" ", response.lastName)} was successfully added as an employee`);
+                                findAllEmployees().then(data => {
+                                    console.table(data);
+                                    init();
+                                })
+                            })
                     )
                 })
-            }             
-            )
+            })
         })
     })
 }
@@ -185,30 +184,48 @@ function updateEmployee() {
                             message: 'What is the employee role title',
                             choices: findAllRolesResponse.map(roleData => roleData.title)
                         }
-                    ]).then(({ employeeRole }) =>
-                        connection.query('UPDATE employee SET ? WHERE ?',
-                            [
+                    ]).then(({ employeeRole }) => {
+                        findAllManagers().then(managerData => {
+                            let managerArray = managerData.map(managerData => managerData.first_name.concat(' ', managerData.last_name));
+                            managerArray.unshift('None');
+                            inquirer.prompt([
                                 {
-                                    first_name: response.firstName,
-                                    last_name: response.lastName,
-                                    role_id: findAllRolesResponse.filter(roleData => roleData.title === employeeRole)[0].id,
-                                    manager_id: 1
-                                    // is_manager
-                                },
-                                {
-                                    id: findAllEmployeeResponse.filter(employeeData => {
-                                        if (employeeData.first_name === updateEmployee.split(" ")[0] && employeeData.last_name === updateEmployee.split(" ")[1]) {
-                                            return true
-                                        }
-                                    })[0].id,
-                                },
-                            ],
-                            (err) => {
-                                if (err) throw err;
-                                console.log('\x1b[32m%s\x1b[0m', `${response.firstName.concat(" ", response.lastName)} was successfully updated`);
-                                init();
-                            })
-                    )
+                                    type: 'list',
+                                    name: 'employeeManager',
+                                    message: "Who is the employee's manager?",
+                                    choices: managerArray
+                                }
+                            ]).then(({ employeeManager }) =>
+                                connection.query('UPDATE employee SET ? WHERE ?',
+                                    [
+                                        {
+                                            first_name: response.firstName,
+                                            last_name: response.lastName,
+                                            role_id: findAllRolesResponse.filter(roleData => roleData.title === employeeRole)[0].id,
+                                            manager_id: employeeManager === 'None' ? 0 : managerData.filter(managerData => {
+                                                console.log(managerData);
+                                                if (managerData.first_name === employeeManager.split(" ")[0] && managerData.last_name === employeeManager.split(" ")[1]) {
+                                                    return true
+                                                }
+                                            })[0].id,
+                                            is_manager: response.isManager === 'Yes' ? true : false
+                                        },
+                                        {
+                                            id: findAllEmployeeResponse.filter(employeeData => {
+                                                if (employeeData.first_name === updateEmployee.split(" ")[0] && employeeData.last_name === updateEmployee.split(" ")[1]) {
+                                                    return true
+                                                }
+                                            })[0].id,
+                                        },
+                                    ],
+                                    (err) => {
+                                        if (err) throw err;
+                                        console.log('\x1b[32m%s\x1b[0m', `${response.firstName.concat(" ", response.lastName)} was successfully updated`);
+                                        init();
+                                    })
+                            )
+                        })
+                    })
                 })
             })
         })
@@ -218,95 +235,93 @@ function updateEmployee() {
 
 // initiate function prompts the user what action they would like to perform
 function init() {
-    console.log('---------------------------------------\n');
-    inquirer.prompt(questions.initQuestions).then(response => {
-        if (response.userChoice === 'View all employees') {
-            findAllEmployees().then(data => {
-                console.table(data);
-                init();
-            })
-        } else if (response.userChoice === 'View all managers') {
-            findAllManagers().then(data => {
-                console.table(data);
-                init();
-            })
-        } else if (response.userChoice === 'View all roles') {
-            findAllRoles().then(data => {
-                console.table(data);
-                init();
-            })
-        } else if (response.userChoice === 'View all departments') {
-            findAllDepartments().then(data => {
-                console.table(data);
-                init();
-            })
-        } else if (response.userChoice === 'View all employees by department') {
-            findAllDepartments().then(data => {
-                inquirer.prompt([
-                    {
-                        type: 'list',
-                        name: 'viewDepartment',
-                        message: 'Select a department',
-                        choices: data.map(departmentData => departmentData.name)
-                    }
-                ]).then(({ viewDepartment }) =>
-                    connection.query('SELECT department.name AS department, employee.first_name, employee.last_name, employee.id, roles.title, roles.salary, CONCAT(manager.first_name, " ", manager.last_name) AS manager, employee.is_manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id WHERE ?',
-                        {
-                            name: viewDepartment,
-                        }).then(data => {
+                console.log('---------------------------------------\n');
+                inquirer.prompt(questions.initQuestions).then(response => {
+                    if (response.userChoice === 'View all employees') {
+                        findAllEmployees().then(data => {
                             console.table(data);
                             init();
                         })
-                )
-            })
-        } else if (response.userChoice === 'View all employees by manager') {
-            findAllManagers().then(data => {
-                inquirer.prompt([
-                    {
-                        type: 'list',
-                        name: 'viewManager',
-                        message: 'Select a manager',
-                        choices: data.map(managerData => managerData.first_name.concat(' ', managerData.last_name))
-                    }
-                ]).then(({ viewManager }) =>
-                    connection.query('SELECT employee.first_name, employee.last_name, employee.id, CONCAT(manager.first_name, " ", manager.last_name) AS manager, roles.title, department.name AS department, roles.salary, employee.is_manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id WHERE ?',
-                        {
-                            manager_id: 1,
-                            // manager: data.filter(managerData => {
-                            //     console.log(managerData);
-                            //     if (managerData.first_name === viewManager.split(" ")[0] && managerData.last_name === viewManager.split(" ")[1]) {
-                            //         return true
-                            //     }
-                            // })[0].id,
-                        }).then(data => {
+                    } else if (response.userChoice === 'View all managers') {
+                        findAllManagers().then(data => {
                             console.table(data);
                             init();
                         })
-                )
-            })
-        } else if (response.userChoice === 'Add a department') {
-            addDepartment();
-        } else if (response.userChoice === 'Add an employee role') {
-            addRole();
-        } else if (response.userChoice === 'Add an employee') {
-            addEmployee();
-        } else if (response.userChoice === 'Remove an employee') {
-            removeEmployee();
-        } else if (response.userChoice === 'Update an employee') {
-            updateEmployee();
-        } else {
-            console.log('\x1b[31m%s\x1b[0m', '\nProgram ended\n');
-            process.exit(1);
-        }
-    })
-}
+                    } else if (response.userChoice === 'View all roles') {
+                        findAllRoles().then(data => {
+                            console.table(data);
+                            init();
+                        })
+                    } else if (response.userChoice === 'View all departments') {
+                        findAllDepartments().then(data => {
+                            console.table(data);
+                            init();
+                        })
+                    } else if (response.userChoice === 'View all employees by department') {
+                        findAllDepartments().then(data => {
+                            inquirer.prompt([
+                                {
+                                    type: 'list',
+                                    name: 'viewDepartment',
+                                    message: 'Select a department',
+                                    choices: data.map(departmentData => departmentData.name)
+                                }
+                            ]).then(({ viewDepartment }) =>
+                                connection.query('SELECT department.name AS department, employee.first_name, employee.last_name, employee.id, roles.title, roles.salary, CONCAT(manager.first_name, " ", manager.last_name) AS manager, employee.is_manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id WHERE ?',
+                                    {
+                                        name: viewDepartment,
+                                    }).then(data => {
+                                        console.table(data);
+                                        init();
+                                    })
+                            )
+                        })
+                    } else if (response.userChoice === 'View all employees by manager') {
+                        findAllManagers().then(data => {
+                            inquirer.prompt([
+                                {
+                                    type: 'list',
+                                    name: 'viewManager',
+                                    message: 'Select a manager',
+                                    choices: data.map(managerData => managerData.first_name.concat(' ', managerData.last_name))
+                                }
+                            ]).then(({ viewManager }) =>
+                                connection.query('SELECT employee.id, employee.first_name, employee.last_name FROM employee WHERE ?',
+                                    {
+                                        manager_id: data.filter(managerData => {
+                                            if (managerData.first_name === viewManager.split(" ")[0] && managerData.last_name === viewManager.split(" ")[1]) {
+                                                return true
+                                            }
+                                        })[0].id,
+                                    }).then(data => {
+                                        console.table(data);
+                                        init();
+                                    })
+                            )
+                        })
+                    } else if (response.userChoice === 'Add a department') {
+                        addDepartment();
+                    } else if (response.userChoice === 'Add an employee role') {
+                        addRole();
+                    } else if (response.userChoice === 'Add an employee') {
+                        addEmployee();
+                    } else if (response.userChoice === 'Remove an employee') {
+                        removeEmployee();
+                    } else if (response.userChoice === 'Update an employee') {
+                        updateEmployee();
+                    } else {
+                        console.log('\x1b[31m%s\x1b[0m', '\nProgram ended\n');
+                        process.exit(1);
+                    }
+                })
+            }
 
 // connect mysql connection
 connection.connect((err) => {
-    if (err) throw err;
-    console.log(`connected as id ${connection.threadId}`);
-    init();
-});
+                if (err) throw err;
+                console.log(`connected as id ${connection.threadId}`);
+                init();
+            });
 
 
 
