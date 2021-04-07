@@ -21,7 +21,8 @@ Repository: [https://github.com/spencercreer/mysql-employee-tracker](https://git
 
 ## Animation
 The following animation demonstrates the application functionality:
-![MySQL Employee Content Management System animation](TBD)
+<br />
+![MySQL Employee Content Management System animation](./assets/mysql_employee.gif)
 ## Instructions
 Initiate the program by typing node index.js. Once the program has been run. Inquirer will prompt the user several prompts. The user may view, add, update, and remove employees as well as set up departments and employee roles.
 ## Installation

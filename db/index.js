@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const cTable = require('console.table');
 const questions = require('../questions');
 const util = require('util');
+require('dotenv').config()
 
 // set up mysql connection
 var connection = mysql.createConnection({
@@ -158,7 +159,10 @@ function removeEmployee() {
                 (err) => {
                     if (err) throw err;
                     console.log('\x1b[32m%s\x1b[0m', `${removeEmployee} was successfully removed`);
-                    init();
+                    findAllEmployees().then(data => {
+                        console.table(data);
+                        init();
+                    })
                 })
         )
     });
@@ -221,7 +225,10 @@ function updateEmployee() {
                                     (err) => {
                                         if (err) throw err;
                                         console.log('\x1b[32m%s\x1b[0m', `${response.firstName.concat(" ", response.lastName)} was successfully updated`);
-                                        init();
+                                        findAllEmployees().then(data => {
+                                            console.table(data);
+                                            init();
+                                        })
                                     })
                             )
                         })
