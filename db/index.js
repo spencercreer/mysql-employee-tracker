@@ -4,14 +4,14 @@ const mysql = require('mysql');
 const cTable = require('console.table');
 const questions = require('../questions');
 const util = require('util');
-require('dotenv').config()
+require('dotenv').config({path: "../.env"})
 
 // set up mysql connection
 var connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
     user: 'root',
-    password: '955503Sc!',
+    password: process.env.PASSWORD,
     database: 'employeeDB'
 });
 
